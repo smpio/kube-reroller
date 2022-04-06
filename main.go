@@ -12,7 +12,7 @@ import (
 )
 
 var workloadLabel = "k8s.smp.io/reroll-every"
-var podTemplateAnnotation = "k8s.smp.io/rev"
+var podTemplateAnnotation = "k8s.smp.io/last-reroll"
 var listOptions = metav1.ListOptions{
 	LabelSelector: workloadLabel,
 }
@@ -71,11 +71,10 @@ func do(baseItem Workload) {
 }
 
 func getClient() *kubernetes.Clientset {
-	// config, err := rest.InClusterConfig()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	config := &rest.Config{Host: "localhost:8001"}
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatal(err)
