@@ -24,8 +24,13 @@ func main() {
 	flag.Parse()
 
 	clientset = getClient()
-	do(deployment{nil})
-	do(statefulSet{nil})
+	for {
+		do(deployment{nil})
+		do(statefulSet{nil})
+		do(daemonSet{nil})
+		do(replicaSet{nil})
+		time.Sleep(1 * time.Minute)
+	}
 }
 
 func do(baseItem Workload) {
@@ -64,41 +69,6 @@ func do(baseItem Workload) {
 		}
 	}
 }
-
-/*
-func doDeployments(clientset *kubernetes.Clientset) {
-	now := time.Now()
-
-	list, err := clientset.AppsV1().Deployments("").List(context.TODO(), listOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, deploy := range list.Items {
-		schedule, err := time.ParseDuration(deploy.Labels[workloadLabel])
-		if err != nil {
-			log.Printf("Invalid duration on Deployment %s/%s: %s", deploy.Namespace, deploy.Name, err)
-			continue
-		}
-		rev, err := strconv.ParseInt(deploy.Spec.Template.Annotations[podTemplateAnnotation], 10, 64)
-		if err != nil {
-			log.Printf("Invalid annotation on Deployment pod template %s/%s: %s", deploy.Namespace, deploy.Name, err)
-			continue
-		}
-
-		lastRevTime := time.Unix(rev, 0)
-		if now.Before(lastRevTime.Add(schedule)) {
-			continue
-		}
-
-		log.Printf("Rerolling Deployment %s/%s", deploy.Namespace, deploy.Name)
-		deploy.Spec.Template.Annotations[podTemplateAnnotation] = strconv.FormatInt(now.Unix(), 10)
-		_, err = clientset.AppsV1().Deployments(deploy.Namespace).Update(context.TODO(), &deploy, metav1.UpdateOptions{})
-		if err != nil {
-			log.Printf("Failed to update Deployment %s/%s: %s", deploy.Namespace, deploy.Name, err)
-		}
-	}
-}*/
 
 func getClient() *kubernetes.Clientset {
 	// config, err := rest.InClusterConfig()
